@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.ir.builders.declarations.buildValueParameter
+import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
+
 plugins {
     kotlin("jvm") version "2.0.0"
 }
