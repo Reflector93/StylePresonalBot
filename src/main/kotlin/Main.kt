@@ -21,9 +21,9 @@ import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
 
-fun main() {
+fun main(arguments: Array<String>) {
     val bot = bot {
-        token = Variables.TOKEN
+        token = arguments[0]
         timeout = Variables.TIMEOUT
         logLevel = LogLevel.Network.Body
 
