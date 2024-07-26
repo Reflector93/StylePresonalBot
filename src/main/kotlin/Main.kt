@@ -1,15 +1,15 @@
 package org.style_personal_bot
 
+import com.github.kotlintelegrambot.Bot
 import com.github.kotlintelegrambot.bot
 import com.github.kotlintelegrambot.dispatch
 import com.github.kotlintelegrambot.dispatcher.*
+import com.github.kotlintelegrambot.dispatcher.handlers.CallbackQueryHandlerEnvironment
+import com.github.kotlintelegrambot.dispatcher.handlers.CommandHandlerEnvironment
 import com.github.kotlintelegrambot.dispatcher.message
-import com.github.kotlintelegrambot.entities.ChatId
-import com.github.kotlintelegrambot.entities.InlineKeyboardMarkup
-import com.github.kotlintelegrambot.entities.KeyboardReplyMarkup
+import com.github.kotlintelegrambot.entities.*
 import com.github.kotlintelegrambot.entities.ParseMode.MARKDOWN
 import com.github.kotlintelegrambot.entities.ParseMode.MARKDOWN_V2
-import com.github.kotlintelegrambot.entities.ReplyKeyboardRemove
 import com.github.kotlintelegrambot.entities.TelegramFile.ByUrl
 import com.github.kotlintelegrambot.entities.dice.DiceEmoji
 import com.github.kotlintelegrambot.entities.inlinequeryresults.InlineQueryResult
@@ -20,11 +20,12 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
+import com.github.kotlintelegrambot.types.TelegramBotResult
 
 fun main(arguments: Array<String>) {
     val bot = bot {
         token = arguments[0]
-        timeout = Variables.TIMEOUT
+        timeout = 30
         logLevel = LogLevel.Network.Body
 
         dispatch {
@@ -37,29 +38,11 @@ fun main(arguments: Array<String>) {
             }
 
             command("start") {
-                val result = bot.sendMessage(chatId = ChatId.fromId(update.message!!.chat.id), text = "Bot started")
-
-                result.fold(
-                    {
-                        // do something here with the response
-                    },
-                    {
-                        // do something with the error
-                    },
-                )
+                botStartActions(this)
             }
 
             command("hello") {
-                val result = bot.sendMessage(chatId = ChatId.fromId(update.message!!.chat.id), text = "Hello, world!")
-
-                result.fold(
-                    {
-                        // do something here with the response
-                    },
-                    {
-                        // do something with the error
-                    },
-                )
+                botStartActions(this)
             }
 
             command("commandWithArgs") {
@@ -138,9 +121,17 @@ fun main(arguments: Array<String>) {
                 )
             }
 
-            callbackQuery("testButton") {
+            callbackQuery("personalHelp") {
                 val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
-                bot.sendMessage(ChatId.fromId(chatId), callbackQuery.data)
+                bot.sendMessage(
+                    ChatId.fromId(chatId),
+                    "Вы можете написать мне свои пожелания или связаться со мной любым удобным способом"
+                )
+                bot.sendContact(ChatId.fromId(chatId), "+79650970483", "Галина Чеверда-Ваш личный fashion-стилист")
+            }
+
+            callbackQuery("getAnyFashion") {
+                chooseFashion(this)
             }
 
             callbackQuery(
@@ -204,7 +195,10 @@ fun main(arguments: Array<String>) {
             }
 
             dice {
-                bot.sendMessage(ChatId.fromId(message.chat.id), "A dice ${dice.emoji.emojiValue} with value ${dice.value} has been received!")
+                bot.sendMessage(
+                    ChatId.fromId(message.chat.id),
+                    "A dice ${dice.emoji.emojiValue} with value ${dice.value} has been received!"
+                )
             }
 
             telegramError {
@@ -221,4 +215,65 @@ fun generateUsersButton(): List<List<KeyboardButton>> {
         listOf(KeyboardButton("Request location (not supported on desktop)", requestLocation = true)),
         listOf(KeyboardButton("Request contact", requestContact = true)),
     )
+}
+
+fun botStartActions(commandHandlerEnvironment: CommandHandlerEnvironment) {
+    val inlineKeyboardMarkup = InlineKeyboardMarkup.create(
+        listOf(
+            InlineKeyboardButton.CallbackData(
+                text = "Персональная консультация и помощь",
+                callbackData = "personalHelp"
+            )
+        ),
+        listOf(
+            InlineKeyboardButton.CallbackData(
+                text = "Подбор образа на любой повод",
+                callbackData = "getAnyFashion"
+            )
+        ),
+        listOf(
+            InlineKeyboardButton.CallbackData(
+                text = "Нужна срочно вещь «Где купить?»",
+                callbackData = "whereToBuy"
+            )
+        ),
+        listOf(
+            InlineKeyboardButton.CallbackData(
+                text = "Составить образ из текущего гардероба",
+                callbackData = "getFashionByCurrentClothes"
+            )
+        ),
+    )
+
+    val result = commandHandlerEnvironment.bot.sendMessage(
+        chatId = ChatId.fromId(commandHandlerEnvironment.message.chat.id),
+        text = "Добро пожаловать, ${commandHandlerEnvironment.message.chat.username}! \nЗдесь ты можешь выбрать интересующую тебя услугу.",
+        replyMarkup = inlineKeyboardMarkup,
+    )
+
+    result.fold(
+        {
+            // do something here with the response
+        },
+        {
+            // do something with the error
+        },
+    )
+}
+
+fun chooseFashion(callbackQueryHandlerEnvironment: CallbackQueryHandlerEnvironment) {
+    val chatId = callbackQueryHandlerEnvironment.callbackQuery.message?.chat?.id ?: return
+    val inlineKeyboardMarkup = InlineKeyboardMarkup.create(
+        listOf(InlineKeyboardButton.CallbackData(text = "Классический образ", callbackData = "classic")),
+        listOf(InlineKeyboardButton.CallbackData(text = "Образ на мероприятие", callbackData = "event")),
+        listOf(InlineKeyboardButton.CallbackData(text = "Повседневный образ", callbackData = "daily")),
+    )
+
+    val result = callbackQueryHandlerEnvironment.bot.sendMessage(
+        chatId = ChatId.fromId(chatId),
+        text = "Выберите, пожалуйста, какой образ Вы хотите собрать?",
+        replyMarkup = inlineKeyboardMarkup,
+    )
+
+    result.fold({}, {})
 }
