@@ -19,6 +19,7 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
+import com.github.kotlintelegrambot.network.fold
 
 fun main(arguments: Array<String>) {
     val bot = bot {
@@ -66,7 +67,7 @@ fun main(arguments: Array<String>) {
                     ~strikethrough~
                     *bold _italic bold ~italic bold strikethrough~ __underline italic bold___ bold*
                     [inline URL](http://www.example.com/)
-                    [inline mention of a user](tg://user?id=123456789)
+                    [inline mention of a user](tg://user?id=136733370)
                     `inline fixed-width code`
                     ```kotlin
                     fun main() {
@@ -121,11 +122,16 @@ fun main(arguments: Array<String>) {
 
             callbackQuery("personalHelp") {
                 val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
+                val markdownV2Text = """Вы можете написать мне свои пожелания или связаться со мной любым удобным способом
+[Галина
+Ваш личный стилист](tg://resolve?domain=Gaalinna)
+                """.trimIndent()
                 bot.sendMessage(
-                    ChatId.fromId(chatId),
-                    "Вы можете написать мне свои пожелания или связаться со мной любым удобным способом"
+                    chatId = ChatId.fromId(chatId),
+                    text = markdownV2Text,
+                    parseMode = MARKDOWN_V2
                 )
-                bot.sendContact(ChatId.fromId(chatId), "+79650970483", "Галина Чеверда-Ваш личный fashion-стилист")
+                bot.sendContact(chatId = ChatId.fromId(chatId), phoneNumber = "+79650970483", firstName = "Галина", lastName = "Ваш личный fashion-стилист")
             }
 
             callbackQuery("getAnyFashion") {
@@ -219,25 +225,25 @@ fun botStartActions(commandHandlerEnvironment: CommandHandlerEnvironment) {
     val inlineKeyboardMarkup = InlineKeyboardMarkup.create(
         listOf(
             InlineKeyboardButton.CallbackData(
-                text = "Персональная консультация и помощь",
+                text = "\uD83D\uDC69\uD83C\uDFFB\u200D\uD83D\uDCBB Персональная консультация и помощь",
                 callbackData = "personalHelp"
             )
         ),
         listOf(
             InlineKeyboardButton.CallbackData(
-                text = "Подбор образа на любой повод",
+                text = "\uD83D\uDC57\uD83D\uDC60 Подбор образа на любой повод",
                 callbackData = "getAnyFashion"
             )
         ),
         listOf(
             InlineKeyboardButton.CallbackData(
-                text = "Нужна срочно вещь «Где купить?»",
+                text = "\uD83D\uDD0E Нужна срочно вещь «Где купить?»",
                 callbackData = "whereToBuy"
             )
         ),
         listOf(
             InlineKeyboardButton.CallbackData(
-                text = "Составить образ из текущего гардероба",
+                text = "\uD83E\uDDF3 Составить образ из текущего гардероба",
                 callbackData = "getFashionByCurrentClothes"
             )
         ),
