@@ -19,7 +19,6 @@ import com.github.kotlintelegrambot.entities.keyboard.InlineKeyboardButton
 import com.github.kotlintelegrambot.entities.keyboard.KeyboardButton
 import com.github.kotlintelegrambot.extensions.filters.Filter
 import com.github.kotlintelegrambot.logging.LogLevel
-import com.github.kotlintelegrambot.network.fold
 
 fun main(arguments: Array<String>) {
     val bot = bot {
@@ -122,15 +121,6 @@ fun main(arguments: Array<String>) {
 
             callbackQuery("personalHelp") {
                 val chatId = callbackQuery.message?.chat?.id ?: return@callbackQuery
-                val markdownV2Text = """Вы можете написать мне свои пожелания или связаться со мной любым удобным способом
-[Галина
-Ваш личный стилист](tg://resolve?domain=Gaalinna)
-                """.trimIndent()
-                bot.sendMessage(
-                    chatId = ChatId.fromId(chatId),
-                    text = markdownV2Text,
-                    parseMode = MARKDOWN_V2
-                )
                 bot.sendContact(chatId = ChatId.fromId(chatId), phoneNumber = "+79650970483", firstName = "Галина", lastName = "Ваш личный fashion-стилист")
             }
 
